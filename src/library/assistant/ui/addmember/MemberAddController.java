@@ -3,6 +3,7 @@ package library.assistant.ui.addmember;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import library.assistant.database.DatabaseHandler;
+import library.assistant.ui.rfid.Read;
 
 public class MemberAddController implements Initializable {
 
@@ -31,6 +33,8 @@ public class MemberAddController implements Initializable {
 
     @FXML
     private AnchorPane memberRootPane;
+    @FXML
+    private JFXTextField epcCode;
 
     /**
      * Initializes the controller class.
@@ -46,8 +50,9 @@ public class MemberAddController implements Initializable {
         String mId = id.getText();
         String mMobile = mobile.getText();
         String mEmail = email.getText();
+        String mEpc = epcCode.getText();
 
-        Boolean flag = mName.isEmpty() || mId.isEmpty() || mMobile.isEmpty() || mEmail.isEmpty();
+        Boolean flag = mEpc.isEmpty() || mName.isEmpty() || mId.isEmpty() || mMobile.isEmpty() || mEmail.isEmpty();
         if (flag) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
@@ -58,6 +63,7 @@ public class MemberAddController implements Initializable {
 
         String st = "INSERT INTO MEMBER VALUES ("
                 + "'" + mId + "',"
+                + "'" + mEpc + "',"
                 + "'" + mName + "',"
                 + "'" + mMobile + "',"
                 + "'" + mEmail + "'"
@@ -83,6 +89,29 @@ public class MemberAddController implements Initializable {
     private void cancelMember(ActionEvent event) {
         Stage stage = (Stage) memberRootPane.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    private void getEpcByRfid(ActionEvent event) {
+
+        Read readBook = new Read();
+        readBook.read_start(new String[]{"tmr:///com5", "--ant", "1"}, 200);
+        ArrayList<String> getEpcVals = readBook.getmEpcList();
+
+        if (getEpcVals.size() > 1) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Please Scan only one RFID Tag!");
+            alert.showAndWait();
+            return;
+        }
+        
+        if(getEpcVals.size() <= 0) {
+            epcCode.setText("");
+            return;
+        }
+        epcCode.setText(getEpcVals.get(0));
+
     }
 
 }

@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +16,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import library.assistant.database.DatabaseHandler;
+import library.assistant.ui.rfid.Read;
 
 /**
  * FXML Controller class
@@ -34,9 +36,11 @@ public class BookAddController implements Initializable {
 
     @FXML
     private AnchorPane rootPaneAddBook;
-    
+
     DatabaseHandler databaseHandler;
-    
+
+    @FXML
+    private JFXTextField epcCode;
 
     /**
      * Initializes the controller class.
@@ -44,18 +48,19 @@ public class BookAddController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         databaseHandler = DatabaseHandler.getInstance();
-        
+
         checkData();
     }
 
     @FXML
     private void saveAddBook(ActionEvent event) {
         String bookId = id.getText();
+        String bookEpc = epcCode.getText();
         String bookAuthor = author.getText();
         String bookTitle = title.getText();
         String bookPublisher = publisher.getText();
 
-        if (bookId.isEmpty() || bookAuthor.isEmpty() || bookTitle.isEmpty() || bookPublisher.isEmpty()) {
+        if (bookId.isEmpty() || bookEpc.isEmpty() || bookAuthor.isEmpty() || bookTitle.isEmpty() || bookPublisher.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setHeaderText(null);
             alert.setContentText("Please Enter in all fields");
@@ -65,6 +70,7 @@ public class BookAddController implements Initializable {
 
         String qu = "INSERT INTO BOOK VALUES ("
                 + "'" + bookId + "',"
+                + "'" + bookEpc + "',"
                 + "'" + bookTitle + "',"
                 + "'" + bookAuthor + "',"
                 + "'" + bookPublisher + "',"
@@ -103,6 +109,28 @@ public class BookAddController implements Initializable {
         } catch (SQLException ex) {
             Logger.getLogger(BookAddController.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @FXML
+    private void getEpcByRfid(ActionEvent event) {
+
+        Read readBook = new Read();
+        readBook.read_start(new String[]{"tmr:///com5", "--ant", "1"}, 200);
+        ArrayList<String> getEpcVals = readBook.getmEpcList();
+
+        if (getEpcVals.size() > 1) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Please Scan only one RFID Tag!");
+            alert.showAndWait();
+            return;
+        }
+        if(getEpcVals.size() <= 0) {
+            epcCode.setText("");
+            return;
+        }
+        epcCode.setText(getEpcVals.get(0));
+
     }
 
 }

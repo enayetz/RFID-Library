@@ -11,6 +11,8 @@
     <jar href="lib\derby.jar" size="3232770" download="eager" />
     <jar href="lib\derbyclient.jar" size="588394" download="eager" />
     <jar href="lib\jfoenix-8.0.10.jar" size="2710207" download="eager" />
+    <jar href="lib\ltkjava-1.0.0.6.jar" size="2548576" download="eager" />
+    <jar href="lib\mercuryapi.jar" size="632637" download="eager" />
   </resources>
   <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="Library Assistant" >
     <param name="requiredFXVersion" value="8.0+"/>

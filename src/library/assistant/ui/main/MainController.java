@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,12 +15,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import library.assistant.database.DatabaseHandler;
+import library.assistant.ui.rfid.Read;
 
 public class MainController implements Initializable {
 
@@ -44,6 +47,20 @@ public class MainController implements Initializable {
     private Text memberName;
     @FXML
     private Text memberMobile;
+    @FXML
+    private Text rfidBookName;
+    @FXML
+    private Text rfidAuthor;
+    @FXML
+    private Text rfidStatus;
+    @FXML
+    private Text rfidMemberName;
+    @FXML
+    private Text rfidMobile;
+    @FXML
+    private HBox rfid_book_info;
+    @FXML
+    private HBox rfid_member_info;
 
     /**
      * Initializes the controller class.
@@ -90,7 +107,7 @@ public class MainController implements Initializable {
 
     @FXML
     private void loadBookInfo(ActionEvent event) {
-        
+
         clearBookInfo();
         String bookId = bookIdInput.getText();
         String qu = "SELECT * FROM BOOK WHERE id = '" + bookId + "'";
@@ -118,7 +135,7 @@ public class MainController implements Initializable {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     void clearBookInfo() {
         bookName.setText("");
         bookAuthor.setText("");
@@ -127,7 +144,7 @@ public class MainController implements Initializable {
 
     @FXML
     private void loadMemberInfo(ActionEvent event) {
-        
+
         clearMemberInfo();
         Boolean flag = false;
         String memberId = memberIDInput.getText();
@@ -138,23 +155,129 @@ public class MainController implements Initializable {
             while (rs.next()) {
                 String memberName = rs.getString("name");
                 String memberMobile = rs.getString("mobile");
-                
+
                 this.memberName.setText(memberName);
                 this.memberMobile.setText(memberMobile);
-                
+
                 flag = true;
             }
-            if(!flag) {
+            if (!flag) {
                 memberName.setText("No such member available");
             }
         } catch (SQLException ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     void clearMemberInfo() {
         memberName.setText("");
         memberMobile.setText("");
+    }
+
+    @FXML
+    private void rfidBookScan(ActionEvent event) {
+        clearRfidBookInfo();
+        Read readBook = new Read();
+        readBook.read_start(new String[]{"tmr:///com5", "--ant", "1"}, 200);
+        ArrayList<String> getEpcVals = readBook.getmEpcList();
+        
+        if (getEpcVals.size() > 1) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Please Scan only one RFID Tag!");
+            alert.showAndWait();
+            return;
+        }
+
+        if(getEpcVals.size() <= 0) {
+            clearRfidBookInfo();
+            rfidBookName.setText("Please Bring RFID Book Nearby!");
+            return;
+        }
+        
+        String bookEpc = getEpcVals.get(0);
+        String qu = "SELECT * FROM BOOK WHERE epcValue = '" + bookEpc + "'";
+
+        ResultSet rs = databaseHandler.execQuery(qu);
+        Boolean flag = false;
+
+        try {
+            while (rs.next()) {
+                String bName = rs.getString("title");
+                String bAuthor = rs.getString("author");
+                Boolean bStatus = rs.getBoolean("isAvail");
+                String status = bStatus ? "Available" : "Not Available";
+
+                rfidBookName.setText(bName);
+                rfidAuthor.setText(bAuthor);
+                rfidStatus.setText(status);
+
+                flag = true;
+            }
+            if (!flag) {
+                rfidBookName.setText("No such Book is avalable");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    @FXML
+    private void rfidMemberScan(ActionEvent event) {
+        clearRfidMemberInfo();
+        Read readBook = new Read();
+        readBook.read_start(new String[]{"tmr:///com5", "--ant", "1"}, 200);
+        ArrayList<String> getEpcVals = readBook.getmEpcList();
+        
+        if (getEpcVals.size() > 1) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setHeaderText(null);
+            alert.setContentText("Please Scan only one RFID Tag!");
+            alert.showAndWait();
+            return;
+        }
+
+        if(getEpcVals.size() <= 0) {
+            clearRfidMemberInfo();
+            rfidMemberName.setText("Please Bring RFID Member Nearby!");
+            return;
+        }
+        
+        String memberEpc = getEpcVals.get(0);
+        String qu = "SELECT * FROM MEMBER WHERE epcValue = '" + memberEpc + "'";
+
+        ResultSet rs = databaseHandler.execQuery(qu);
+        Boolean flag = false;
+
+        try {
+            while (rs.next()) {
+                String mName = rs.getString("name");
+                String mAuthor = rs.getString("mobile");
+
+                rfidMemberName.setText(mName);
+                rfidMobile.setText(mAuthor);
+
+                flag = true;
+            }
+            if (!flag) {
+                rfidMemberName.setText("No such Book is avalable");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+
+    private void clearRfidBookInfo() {
+        rfidBookName.setText("");
+        rfidAuthor.setText("");
+        rfidStatus.setText("");
+    }
+
+    private void clearRfidMemberInfo() {
+        rfidMemberName.setText("");
+        rfidMobile.setText("");
     }
 
 }

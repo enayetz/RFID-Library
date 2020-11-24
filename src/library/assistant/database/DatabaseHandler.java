@@ -56,6 +56,7 @@ public final class DatabaseHandler {
             } else {
                 stmt.execute("CREATE TABLE " + TABLE_NAME + "("
                         + "     id varchar(200) primary key,\n"
+                        + "     epcValue varchar(200) ,\n"
                         + "     title varchar(200),\n"
                         + "     author varchar(200),\n"
                         + "     publisher varchar(100), \n"
@@ -81,6 +82,7 @@ public final class DatabaseHandler {
             } else {
                 stmt.execute("CREATE TABLE " + TABLE_NAME + "("
                         + "     id varchar(200) primary key,\n"
+                        + "     epcValue varchar(200) ,\n"
                         + "     name varchar(200),\n"
                         + "     mobile varchar(20),\n"
                         + "     email varchar(100) \n"
