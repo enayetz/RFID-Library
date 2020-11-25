@@ -6,6 +6,7 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +17,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -61,6 +63,9 @@ public class MainController implements Initializable {
     private HBox rfid_book_info;
     @FXML
     private HBox rfid_member_info;
+    
+    private String mRfidBookId;
+    private String mRfidMemberId;
 
     /**
      * Initializes the controller class.
@@ -180,7 +185,7 @@ public class MainController implements Initializable {
         Read readBook = new Read();
         readBook.read_start(new String[]{"tmr:///com5", "--ant", "1"}, 200);
         ArrayList<String> getEpcVals = readBook.getmEpcList();
-        
+
         if (getEpcVals.size() > 1) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText(null);
@@ -189,12 +194,12 @@ public class MainController implements Initializable {
             return;
         }
 
-        if(getEpcVals.size() <= 0) {
+        if (getEpcVals.size() <= 0) {
             clearRfidBookInfo();
             rfidBookName.setText("Please Bring RFID Book Nearby!");
             return;
         }
-        
+
         String bookEpc = getEpcVals.get(0);
         String qu = "SELECT * FROM BOOK WHERE epcValue = '" + bookEpc + "'";
 
@@ -203,6 +208,8 @@ public class MainController implements Initializable {
 
         try {
             while (rs.next()) {
+                //for book issue operation
+                mRfidBookId = rs.getString("id");
                 String bName = rs.getString("title");
                 String bAuthor = rs.getString("author");
                 Boolean bStatus = rs.getBoolean("isAvail");
@@ -229,7 +236,7 @@ public class MainController implements Initializable {
         Read readBook = new Read();
         readBook.read_start(new String[]{"tmr:///com5", "--ant", "1"}, 200);
         ArrayList<String> getEpcVals = readBook.getmEpcList();
-        
+
         if (getEpcVals.size() > 1) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setHeaderText(null);
@@ -238,12 +245,12 @@ public class MainController implements Initializable {
             return;
         }
 
-        if(getEpcVals.size() <= 0) {
+        if (getEpcVals.size() <= 0) {
             clearRfidMemberInfo();
             rfidMemberName.setText("Please Bring RFID Member Nearby!");
             return;
         }
-        
+
         String memberEpc = getEpcVals.get(0);
         String qu = "SELECT * FROM MEMBER WHERE epcValue = '" + memberEpc + "'";
 
@@ -252,6 +259,8 @@ public class MainController implements Initializable {
 
         try {
             while (rs.next()) {
+                //for the use of issue operation
+                mRfidMemberId = rs.getString("id");
                 String mName = rs.getString("name");
                 String mAuthor = rs.getString("mobile");
 
@@ -266,7 +275,7 @@ public class MainController implements Initializable {
         } catch (SQLException ex) {
             Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
     }
 
     private void clearRfidBookInfo() {
@@ -278,6 +287,89 @@ public class MainController implements Initializable {
     private void clearRfidMemberInfo() {
         rfidMemberName.setText("");
         rfidMobile.setText("");
+    }
+
+    @FXML
+    private void loadIssueOperation(ActionEvent event) {
+
+        String memberId = memberIDInput.getText();
+        String bookId = bookIdInput.getText();
+        
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Issue Operation");
+        alert.setHeaderText(null);
+        alert.setContentText("Are you sure want to issue the book " + bookName.getText() + "\n to " + memberName.getText() + " ?");
+
+        Optional<ButtonType> response = alert.showAndWait();
+        if (response.get() == ButtonType.OK) {
+            String str = "INSERT INTO ISSUE(memberId, bookId) VALUES ("
+                    + "'" + memberId + "',"
+                    + "'" + bookId + "')";
+            String str2 = "UPDATE BOOK SET isAvail = false WHERE id = '" + bookId + "'";
+            System.out.println(str + " and " + str2);
+
+            if (databaseHandler.execAction(str) && databaseHandler.execAction(str2)) {
+                Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+                alert1.setTitle("Success");
+                alert1.setHeaderText(null);
+                alert1.setContentText("Book Issue Complete");
+
+                alert1.showAndWait();
+            } else {
+                Alert alert1 = new Alert(Alert.AlertType.ERROR);
+                alert1.setTitle("Failed");
+                alert1.setHeaderText(null);
+                alert1.setContentText("Issue Operation Failed");
+                alert1.showAndWait();
+            }
+        } else {
+            Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+            alert1.setTitle("Cancelled");
+            alert1.setHeaderText(null);
+            alert1.setContentText("Issue Operation cancelled");
+            alert1.showAndWait();
+        }
+
+    }
+
+    @FXML
+    private void rfidBookIssueOperation(ActionEvent event) {
+        
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirm Issue Operation");
+        alert.setHeaderText(null);
+        alert.setContentText("Are you sure want to issue the book " + rfidBookName.getText() + "\n to " + rfidMemberName.getText() + " ?");
+
+        Optional<ButtonType> response = alert.showAndWait();
+        if (response.get() == ButtonType.OK) {
+            String str = "INSERT INTO ISSUE(memberId, bookId) VALUES ("
+                    + "'" + mRfidMemberId + "',"
+                    + "'" + mRfidBookId + "')";
+            String str2 = "UPDATE BOOK SET isAvail = false WHERE id = '" + mRfidBookId + "'";
+            System.out.println(str + " and " + str2);
+
+            if (databaseHandler.execAction(str) && databaseHandler.execAction(str2)) {
+                Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+                alert1.setTitle("Success");
+                alert1.setHeaderText(null);
+                alert1.setContentText("Book Issue Complete");
+
+                alert1.showAndWait();
+            } else {
+                Alert alert1 = new Alert(Alert.AlertType.ERROR);
+                alert1.setTitle("Failed");
+                alert1.setHeaderText(null);
+                alert1.setContentText("Issue Operation Failed");
+                alert1.showAndWait();
+            }
+        } else {
+            Alert alert1 = new Alert(Alert.AlertType.INFORMATION);
+            alert1.setTitle("Cancelled");
+            alert1.setHeaderText(null);
+            alert1.setContentText("Issue Operation cancelled");
+            alert1.showAndWait();
+        }
+        
     }
 
 }

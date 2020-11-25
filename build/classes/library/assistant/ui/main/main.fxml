@@ -168,7 +168,7 @@
                                     </HBox>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                                        <children>
-                                          <Button mnemonicParsing="false" styleClass="setup-button" stylesheets="@main.css" text="Issue" textAlignment="CENTER">
+                                          <Button mnemonicParsing="false" onAction="#loadIssueOperation" styleClass="setup-button" stylesheets="@main.css" text="Issue" textAlignment="CENTER">
                                              <graphic>
                                                 <ImageView fitHeight="112.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>
@@ -317,7 +317,7 @@
                                     </HBox>
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                                        <children>
-                                          <Button mnemonicParsing="false" styleClass="setup-button" stylesheets="@main.css" text="Issue" textAlignment="CENTER">
+                                          <Button mnemonicParsing="false" onAction="#rfidBookIssueOperation" styleClass="setup-button" stylesheets="@main.css" text="Issue" textAlignment="CENTER">
                                              <graphic>
                                                 <ImageView fitHeight="112.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                                                    <image>

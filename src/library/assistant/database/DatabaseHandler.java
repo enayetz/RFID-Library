@@ -26,10 +26,11 @@ public final class DatabaseHandler {
         createConnection();
         setupBookTable();
         setupMemberTable();
+        setupIssueTable();
     }
-    
+
     public static DatabaseHandler getInstance() {
-        if(handler == null) {
+        if (handler == null) {
             handler = new DatabaseHandler();
         }
         return handler;
@@ -94,6 +95,32 @@ public final class DatabaseHandler {
         } finally {
         }
 
+    }
+
+    void setupIssueTable() {
+        String TABLE_NAME = "ISSUE";
+        try {
+            stmt = conn.createStatement();
+            DatabaseMetaData databaseMetaData = conn.getMetaData();
+            ResultSet tables = databaseMetaData.getTables(null, null, TABLE_NAME.toUpperCase(), null);
+            if (tables.next()) {
+                System.out.println("Table " + TABLE_NAME + "already exists. Ready for go!");
+            } else {
+                stmt.execute("CREATE TABLE " + TABLE_NAME + "("
+                        + "     bookID varchar(200) primary key,\n"
+                        + "	memberID varchar(200),\n"
+                        + "	issueTime timestamp default CURRENT_TIMESTAMP,\n"
+                        + "	renew_count integer default 0,\n"
+                        + "	FOREIGN KEY (bookID) REFERENCES BOOK(id),\n"
+                        + "	FOREIGN KEY (memberID) REFERENCES MEMBER(id)"
+                        + " )");
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(DatabaseHandler.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println(ex.getMessage() + " ... setupDatabase");
+        } finally {
+        }
     }
 
     public ResultSet execQuery(String query) {
