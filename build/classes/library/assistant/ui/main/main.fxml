@@ -82,7 +82,7 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <Button contentDisplay="TOP" layoutX="10.0" layoutY="193.0" mnemonicParsing="false" prefHeight="150.0" prefWidth="123.0" text="Read RFID">
+                  <Button contentDisplay="TOP" layoutX="10.0" layoutY="193.0" mnemonicParsing="false" onAction="#loadRfidScanBook" prefHeight="150.0" prefWidth="123.0" text="Read RFID">
                      <graphic>
                         <ImageView fitHeight="24.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
                            <image>

@@ -36,7 +36,7 @@ public class BookListController implements Initializable {
     @FXML
     private TableColumn<Book, String> publisherCol;
     @FXML
-    private TableColumn<Book, String> availabilityCol;
+    private TableColumn<Book, Boolean> availabilityCol;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {

@@ -162,7 +162,7 @@ public class ReadAsync {
         @Override
         public void tagRead(Reader reader, TagReadData trd) {
             mEpcList.add(trd.epcString());
-            System.out.print(trd);
+            System.out.println(trd.epcString());
         }
         
     }

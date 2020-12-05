@@ -97,6 +97,12 @@ public class MainController implements Initializable {
     private void loadBookTable(ActionEvent event) {
         loadWindow("/library/assistant/ui/listbook/book_list.fxml", "Book List");
     }
+    
+    @FXML
+    private void loadRfidScanBook(ActionEvent event) {
+        loadWindow("/library/assistant/ui/listRfidScan/book_list_rfidScan.fxml", "RFID Scan Book List");
+    }
+
 
     void loadWindow(String loc, String title) {
         try {
@@ -371,5 +377,5 @@ public class MainController implements Initializable {
         }
         
     }
-
+    
 }
